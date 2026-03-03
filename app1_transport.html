@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Komunikacja Miejska a Matematyka</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0d0d;
+  --paper: #f5f0e8;
+  --yellow: #f7c948;
+  --red: #e8392a;
+  --blue: #1a4fff;
+  --green: #16a34a;
+  --grey: #888;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* HERO BANNER */
+.hero {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 48px 48px 40px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 6px solid var(--yellow);
+}
+.hero::before {
+  content: '🚌';
+  font-size: 240px;
+  position: absolute;
+  right: -20px;
+  top: -30px;
+  opacity: 0.08;
+  line-height: 1;
+}
+.hero-tag {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 2px;
+  margin-bottom: 18px;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  max-width: 700px;
+  margin-bottom: 16px;
+}
+.hero h1 span { color: var(--yellow); }
+.hero-sub {
+  font-size: 1rem;
+  color: #aaa;
+  max-width: 580px;
+  line-height: 1.6;
+  font-family: 'Space Mono', monospace;
+}
+
+/* LAYOUT */
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 32px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* CARDS */
+.card {
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 24px;
+  position: relative;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.card-title {
+  font-size: 0.68rem;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--grey);
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+.card-yellow { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
+.card-red { border-color: var(--red); box-shadow: 4px 4px 0 var(--red); }
+.card-blue { border-color: var(--blue); box-shadow: 4px 4px 0 var(--blue); }
+
+/* STORY QUOTE */
+.story-box {
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  box-shadow: 6px 6px 0 var(--ink);
+  position: relative;
+}
+.story-box::before {
+  content: '"';
+  font-size: 120px;
+  position: absolute;
+  top: -20px; left: 16px;
+  color: rgba(0,0,0,0.12);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+.story-box p {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 700px;
+  font-weight: 400;
+}
+.story-box strong { font-weight: 800; }
+
+/* GRAPH SVG */
+.graph-wrap {
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 12px;
+  margin-bottom: 28px;
+}
+
+/* CONTROLS */
+select, button {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+}
+select {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 8px 14px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+}
+select:focus { outline: 2px solid var(--yellow); }
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--yellow); color: var(--ink); }
+.btn.green { background: var(--green); border-color: var(--green); }
+.btn.red { background: var(--red); border-color: var(--red); }
+
+/* RESULT */
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-family: 'Space Mono', monospace;
+  border: 2px solid;
+  margin-top: 12px;
+  width: 100%;
+  justify-content: center;
+}
+.result-badge.yes { background: #dcfce7; border-color: var(--green); color: var(--green); }
+.result-badge.no { background: #fee2e2; border-color: var(--red); color: var(--red); }
+
+/* PATH DISPLAY */
+.path-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.path-node {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6px 14px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+}
+.path-node.start { background: var(--blue); }
+.path-node.end { background: var(--red); }
+.path-node.mid { background: var(--green); }
+.path-arrow { color: var(--ink); font-size: 1.2rem; font-weight: 900; }
+
+/* MATRIX */
+.matrix {
+  display: grid;
+  gap: 3px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  margin-top: 12px;
+}
+.matrix-cell {
+  padding: 6px 4px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  font-weight: 700;
+}
+.matrix-cell.header { background: var(--ink); color: var(--paper); font-size: 0.7rem; }
+.matrix-cell.yes-cell { background: #dcfce7; color: var(--green); }
+.matrix-cell.no-cell { background: #f5f5f5; color: #ccc; }
+.matrix-cell.selected-cell { background: var(--yellow); color: var(--ink); border-color: var(--ink); }
+
+/* STATS ROW */
+.stats-row { display: flex; gap: 16px; margin-bottom: 28px; }
+.stat-box {
+  flex: 1;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 20px;
+  text-align: center;
+  border: 2px solid var(--ink);
+}
+.stat-num { font-size: 2.2rem; font-weight: 800; color: var(--yellow); display: block; }
+.stat-label { font-size: 0.72rem; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: #aaa; margin-top: 4px; }
+
+/* THEOREM BOX */
+.theorem {
+  background: var(--blue);
+  color: #fff;
+  padding: 24px 28px;
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  margin-top: 28px;
+}
+.theorem-title { font-size: 0.7rem; font-family: 'Space Mono', monospace; letter-spacing: 3px; text-transform: uppercase; color: var(--yellow); margin-bottom: 12px; }
+.theorem p { font-size: 0.92rem; line-height: 1.7; }
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  margin-top: 36px;
+}
+.section-num {
+  background: var(--red);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border: 2px solid var(--ink);
+}
+.section-header h2 { font-size: 1.25rem; font-weight: 800; }
+
+/* ANIM INDICATOR */
+.anim-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--grey);
+  margin: 0 3px;
+  transition: background 0.3s;
+}
+.anim-dot.active { background: var(--yellow); transform: scale(1.4); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">łańcuchy markowa · teoria grafów</div>
+  <h1>Czy da się dojechać<br>z <span>A</span> do <span>C</span>?</h1>
+  <p class="hero-sub">O osiągalności i przechodniości — czyli matematyce, która decyduje<br>czy twój autobus w ogóle dotrze na miejsce.</p>
+</div>
+
+<div class="container">
+
+  <!-- STORY -->
+  <div class="story-box" style="margin-top:40px;">
+    <p>
+      Wyobraź sobie <strong>Kubę</strong> — studenta z Krakowa, który mieszka w akademiku i musi dostać się na uczelnię.
+      Nie ma bezpośredniej linii. Jedzie autobusem <strong>do centrum</strong>, a potem tramwajem <strong>do uczelni</strong>.
+      Absurdalne? Nie! To właśnie <strong>przechodniość osiągalności</strong> — jeśli A→B i B→C, to da się z A do C.
+      Matematyka komunikacji miejskiej. 🎓
+    </p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-box"><span class="stat-num" id="statNodes">5</span><span class="stat-label">Przystanków</span></div>
+    <div class="stat-box"><span class="stat-num" id="statEdges">6</span><span class="stat-label">Linii</span></div>
+    <div class="stat-box"><span class="stat-num" id="statReach">—</span><span class="stat-label">Par osiągalnych</span></div>
+    <div class="stat-box"><span class="stat-num" id="statPercent">—</span><span class="stat-label">% osiągalności</span></div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- GRAPH -->
+    <div>
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2>Mapa połączeń Kubusia</h2>
+      </div>
+      <div class="graph-wrap">
+        <svg id="graphSvg" width="100%" viewBox="0 0 500 360" style="display:block;">
+          <defs>
+            <marker id="arrN" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#888"/>
+            </marker>
+            <marker id="arrH" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#1a4fff"/>
+            </marker>
+            <marker id="arrP" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#e8392a"/>
+            </marker>
+          </defs>
+          <!-- Edges drawn by JS -->
+          <g id="edgesG"></g>
+          <!-- Nodes drawn by JS -->
+          <g id="nodesG"></g>
+        </svg>
+      </div>
+      <!-- Animate path -->
+      <div style="text-align:center; margin-bottom:8px;" id="dotRow"></div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div>
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2>Sprawdź czy Kuba dotrze</h2>
+      </div>
+      <div class="card card-yellow">
+        <div class="card-title">Wybierz trasę</div>
+        <label style="font-size:0.8rem; display:block; margin-bottom:4px;">Skąd jedzie Kuba?</label>
+        <select id="fromSel"></select>
+        <label style="font-size:0.8rem; display:block; margin-bottom:4px;">Dokąd chce dojechać?</label>
+        <select id="toSel"></select>
+        <button class="btn" id="checkBtn" onclick="checkPath()" style="margin-top:8px;">🔍 Sprawdź trasę</button>
+        <div id="resultDiv"></div>
+        <div id="pathDisplay" class="path-display"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title">Przechodniość w praktyce</div>
+        <p style="font-size:0.85rem; line-height:1.7; color:#555;">
+          Jeśli Kuba może dojechać z <strong>A do B</strong> i z <strong>B do C</strong>,<br>
+          to matematycznie pewne — dojedzie też z <strong>A do C</strong>.<br>
+          Nieważne czy trasa wygląda absurdalnie. Liczy się tylko fakt, że droga <em>istnieje</em>.
+        </p>
+        <div style="margin-top:14px; padding:12px; background:var(--paper); border-left:4px solid var(--blue);">
+          <code style="font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--blue);">
+            i→j AND j→k ⟹ i→k
+          </code>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2>Macierz osiągalności</h2>
+      </div>
+      <div class="card">
+        <div class="card-title">Kto do kogo może dojechać?</div>
+        <div id="matrixDiv"></div>
+        <p style="font-size:0.75rem; color:var(--grey); margin-top:10px; font-family:'Space Mono',monospace;">
+          ✓ = osiągalny &nbsp; · = nieosiągalny &nbsp; żółty = wybrana para
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="theorem">
+    <div class="theorem-title">💡 Kluczowy wniosek matematyczny</div>
+    <p>
+      Relacja osiągalności w łańcuchu Markowa jest <strong>przechodnia</strong>: jeśli stan <em>j</em> jest osiągalny ze stanu <em>i</em>,
+      a stan <em>k</em> jest osiągalny ze stanu <em>j</em>, to <em>k</em> jest też osiągalny z <em>i</em>.
+      To jak sieć połączeń komunikacyjnych — każda przesiadka liczy się, nawet jeśli trasa jest okrężna!
+    </p>
+  </div>
+
+</div>
+
+<script>
+const nodes = [
+  { id:"A", label:"🏠 Akademik",    x:80,  y:180 },
+  { id:"B", label:"🏙️ Centrum",    x:230, y:80  },
+  { id:"C", label:"🎓 Uczelnia",   x:400, y:120 },
+  { id:"D", label:"🛒 Galeria",    x:230, y:280 },
+  { id:"E", label:"🚉 Dworzec",    x:400, y:280 },
+];
+const edges = [
+  { from:"A", to:"B", label:"autobus 3" },
+  { from:"B", to:"C", label:"tramwaj 7" },
+  { from:"A", to:"D", label:"autobus 12" },
+  { from:"D", to:"E", label:"metro M1" },
+  { from:"B", to:"D", label:"pieszo 10min" },
+  { from:"E", to:"C", label:"tramwaj 2" },
+];
+
+const np = Object.fromEntries(nodes.map(n=>[n.id,{x:n.x,y:n.y}]));
+
+// Reachability
+function computeReach(ns, es) {
+  const ids = ns.map(n=>n.id);
+  const R = {};
+  ids.forEach(i=>{ R[i]={}; ids.forEach(j=>R[i][j]=i===j); });
+  es.forEach(e=>R[e.from][e.to]=true);
+  ids.forEach(k=>ids.forEach(i=>ids.forEach(j=>{ if(R[i][k]&&R[k][j])R[i][j]=true; })));
+  return R;
+}
+const reach = computeReach(nodes, edges);
+
+// BFS path
+function bfsPath(start, end) {
+  if(start===end) return [start];
+  const visited=new Set();
+  const queue=[[start,[start]]];
+  while(queue.length) {
+    const [cur,path]=queue.shift();
+    if(cur===end) return path;
+    if(visited.has(cur)) continue;
+    visited.add(cur);
+    edges.filter(e=>e.from===cur).forEach(e=>{ if(!visited.has(e.to)) queue.push([e.to,[...path,e.to]]); });
+  }
+  return [];
+}
+
+let currentPath=[], animTimer=null, animStep=-1;
+
+function drawGraph(highlightPath=[]) {
+  const svg = document.getElementById('graphSvg');
+  const eg = document.getElementById('edgesG');
+  const ng = document.getElementById('nodesG');
+  eg.innerHTML=''; ng.innerHTML='';
+
+  // Draw edges
+  edges.forEach((e,i)=>{
+    const f=np[e.from], t=np[e.to];
+    const onPath = highlightPath.length>=2 && highlightPath.some((n,idx)=>idx<highlightPath.length-1&&n===e.from&&highlightPath[idx+1]===e.to);
+    const dx=t.x-f.x, dy=t.y-f.y, len=Math.sqrt(dx*dx+dy*dy);
+    const ux=dx/len, uy=dy/len;
+    const off=12;
+    const x1=f.x+ux*38-uy*off, y1=f.y+uy*38+ux*off;
+    const x2=t.x-ux*40-uy*off, y2=t.y-uy*40+ux*off;
+    const mx=(x1+x2)/2-uy*20, my=(y1+y2)/2+ux*20;
+
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x1},${y1} Q${mx},${my} ${x2},${y2}`);
+    path.setAttribute('stroke', onPath?'#1a4fff':'#bbb');
+    path.setAttribute('stroke-width', onPath?'3':'1.8');
+    path.setAttribute('fill','none');
+    path.setAttribute('marker-end',`url(#${onPath?'arrH':'arrN'})`);
+    eg.appendChild(path);
+
+    const lx=(x1+x2)/2-uy*26, ly=(y1+y2)/2+ux*26;
+    const lt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lt.setAttribute('x',lx); lt.setAttribute('y',ly);
+    lt.setAttribute('fill',onPath?'#1a4fff':'#999');
+    lt.setAttribute('font-size','9');
+    lt.setAttribute('text-anchor','middle');
+    lt.setAttribute('font-family','Space Mono,monospace');
+    lt.textContent=e.label;
+    eg.appendChild(lt);
+  });
+
+  // Draw nodes
+  nodes.forEach((n,i)=>{
+    const inPath=highlightPath.includes(n.id);
+    const isStart=highlightPath[0]===n.id;
+    const isEnd=highlightPath[highlightPath.length-1]===n.id&&highlightPath.length>1;
+    const fill = isStart?'#1a4fff': isEnd?'#e8392a': inPath?'#16a34a': '#fff';
+    const stroke = inPath?'#0d0d0d':'#bbb';
+    const sw = inPath?3:1.5;
+    const textColor = inPath?'#fff':'#0d0d0d';
+
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x',n.x-38); rect.setAttribute('y',n.y-24);
+    rect.setAttribute('width',76); rect.setAttribute('height',48);
+    rect.setAttribute('rx',4);
+    rect.setAttribute('fill',fill);
+    rect.setAttribute('stroke',stroke);
+    rect.setAttribute('stroke-width',sw);
+    g.appendChild(rect);
+
+    const [ico,...rest]=n.label.split(' ');
+    const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t1.setAttribute('x',n.x); t1.setAttribute('y',n.y-4);
+    t1.setAttribute('text-anchor','middle'); t1.setAttribute('font-size','18');
+    t1.textContent=ico; g.appendChild(t1);
+
+    const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t2.setAttribute('x',n.x); t2.setAttribute('y',n.y+14);
+    t2.setAttribute('text-anchor','middle'); t2.setAttribute('font-size','9');
+    t2.setAttribute('fill',textColor);
+    t2.setAttribute('font-family','Space Mono,monospace');
+    t2.setAttribute('font-weight',inPath?'700':'400');
+    t2.textContent=rest.join(' '); g.appendChild(t2);
+
+    const tid=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tid.setAttribute('x',n.x-30); tid.setAttribute('y',n.y-10);
+    tid.setAttribute('font-size','11'); tid.setAttribute('font-weight','800');
+    tid.setAttribute('fill',textColor); tid.setAttribute('font-family','Syne,sans-serif');
+    tid.textContent=n.id; g.appendChild(tid);
+
+    ng.appendChild(g);
+  });
+}
+
+function populateSelects() {
+  const from=document.getElementById('fromSel');
+  const to=document.getElementById('toSel');
+  nodes.forEach(n=>{
+    from.innerHTML+=`<option value="${n.id}">${n.id} – ${n.label}</option>`;
+    to.innerHTML+=`<option value="${n.id}">${n.id} – ${n.label}</option>`;
+  });
+  to.value='C';
+  updateStats();
+}
+
+function updateStats() {
+  const ids=nodes.map(n=>n.id);
+  let cnt=0, total=ids.length*(ids.length-1);
+  ids.forEach(i=>ids.forEach(j=>{ if(i!==j&&reach[i][j])cnt++; }));
+  document.getElementById('statNodes').textContent=nodes.length;
+  document.getElementById('statEdges').textContent=edges.length;
+  document.getElementById('statReach').textContent=cnt;
+  document.getElementById('statPercent').textContent=Math.round(cnt/total*100)+'%';
+}
+
+function checkPath() {
+  const from=document.getElementById('fromSel').value;
+  const to=document.getElementById('toSel').value;
+  const reachable=reach[from][to];
+  const path=bfsPath(from,to);
+
+  const rd=document.getElementById('resultDiv');
+  rd.innerHTML=`<div class="result-badge ${reachable?'yes':'no'}">${reachable?'✅ Kuba dotrze! Osiągalne!':'❌ Kuba utknął. Nieosiągalne!'}</div>`;
+
+  const pd=document.getElementById('pathDisplay');
+  if(reachable&&path.length>0) {
+    pd.innerHTML='<div style="font-size:0.75rem;font-family:Space Mono,monospace;color:#888;width:100%;margin-bottom:8px;">Optymalna trasa:</div>';
+    path.forEach((id,i)=>{
+      const cls=i===0?'start':i===path.length-1?'end':'mid';
+      const n=nodes.find(x=>x.id===id);
+      pd.innerHTML+=`<span class="path-node ${cls}">${n.label.split(' ')[0]} ${id}</span>`;
+      if(i<path.length-1) pd.innerHTML+=`<span class="path-arrow">→</span>`;
+    });
+  } else if(!reachable) {
+    pd.innerHTML='<div style="font-size:0.82rem;color:#e8392a;font-family:Space Mono,monospace;margin-top:8px;">Brak jakiegokolwiek połączenia — nawet z przesiadkami!</div>';
+  }
+
+  drawGraph(path);
+  drawMatrix(from, to);
+
+  // Animate dots
+  const dotRow=document.getElementById('dotRow');
+  dotRow.innerHTML=path.map((_,i)=>`<span class="anim-dot" id="dot${i}"></span>`).join('');
+  let step=0;
+  if(animTimer) clearInterval(animTimer);
+  animTimer=setInterval(()=>{
+    document.querySelectorAll('.anim-dot').forEach(d=>d.classList.remove('active'));
+    const d=document.getElementById(`dot${step}`);
+    if(d) d.classList.add('active');
+    step=(step+1)%Math.max(path.length,1);
+  },700);
+}
+
+function drawMatrix(selFrom='', selTo='') {
+  const ids=nodes.map(n=>n.id);
+  const cols=ids.length+1;
+  const div=document.getElementById('matrixDiv');
+  div.innerHTML='';
+  const grid=document.createElement('div');
+  grid.className='matrix';
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+
+  // Header row
+  const empty=document.createElement('div');
+  empty.className='matrix-cell header'; empty.textContent='↓\\→';
+  grid.appendChild(empty);
+  ids.forEach(j=>{ const c=document.createElement('div'); c.className='matrix-cell header'; c.textContent=j; grid.appendChild(c); });
+
+  ids.forEach(i=>{
+    const rh=document.createElement('div'); rh.className='matrix-cell header'; rh.textContent=i;
+    grid.appendChild(rh);
+    ids.forEach(j=>{
+      const c=document.createElement('div');
+      const isReach=reach[i][j];
+      const isSelected=(i===selFrom&&j===selTo);
+      c.className='matrix-cell '+(isSelected?'selected-cell':isReach?'yes-cell':'no-cell');
+      c.textContent=isReach?'✓':'·';
+      grid.appendChild(c);
+    });
+  });
+  div.appendChild(grid);
+}
+
+// Init
+populateSelects();
+drawGraph();
+drawMatrix();
+checkPath();
+</script>
+</body>
+</html>
