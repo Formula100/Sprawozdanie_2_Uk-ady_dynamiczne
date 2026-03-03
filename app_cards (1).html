@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Łańcuch Markowa — Talia Kart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --felt: #0a2218;
+  --felt2: #0d2d20;
+  --gold: #c9a84c;
+  --gold2: #f0d080;
+  --red: #c0392b;
+  --black: #1a1a1a;
+  --white: #f8f4ea;
+  --dim: #2a4a38;
+  --dimmer: #1a3028;
+  --text: #e8dfc0;
+  --accent: #4a9e6a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--felt);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(74,158,106,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.008) 40px, rgba(255,255,255,0.008) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.008) 40px, rgba(255,255,255,0.008) 41px);
+}
+
+/* HEADER */
+.header {
+  background: linear-gradient(180deg, #060e0a 0%, var(--felt) 100%);
+  border-bottom: 2px solid var(--gold);
+  padding: 24px 36px 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.header-left h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: var(--gold2);
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+.header-left h1 span { color: var(--gold); font-style: italic; }
+.header-left p {
+  font-size: 0.72rem;
+  color: #7a9a88;
+  margin-top: 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.suit-deco { font-size: 2rem; opacity: 0.4; letter-spacing: 8px; }
+
+/* MAIN LAYOUT */
+.app { display: grid; grid-template-columns: 1fr 320px; min-height: calc(100vh - 94px); }
+
+/* LEFT PANEL */
+.left-panel { border-right: 1px solid var(--dim); display: flex; flex-direction: column; }
+
+/* CARD DECK RING */
+.deck-section {
+  flex: 0 0 auto;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--dim);
+}
+.deck-title {
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.deck-ring-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.deck-ring-inner {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+#deckCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* STEP CONTROLS */
+.step-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dim);
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-label {
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #7a9a88;
+}
+.gold-input {
+  background: var(--dimmer);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  color: var(--gold2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  padding: 8px 14px;
+  width: 120px;
+  outline: none;
+}
+.gold-input:focus { border-color: var(--gold2); box-shadow: 0 0 0 2px rgba(201,168,76,0.2); }
+.gold-btn {
+  background: linear-gradient(135deg, #8a6820, var(--gold));
+  color: var(--black);
+  border: none;
+  border-radius: 3px;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.gold-btn:hover { background: linear-gradient(135deg, var(--gold), var(--gold2)); transform: translateY(-1px); }
+.gold-btn.secondary {
+  background: var(--dimmer);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+.gold-btn.secondary:hover { background: var(--dim); }
+
+/* CURRENT CARD DISPLAY */
+.current-card-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--dim);
+}
+.step-result {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.mini-card {
+  width: 56px;
+  height: 80px;
+  background: var(--white);
+  border-radius: 6px;
+  border: 2px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.mini-card:hover { transform: translateY(-3px); }
+.mini-card.red { color: var(--red); }
+.mini-card.black { color: #111; }
+.mini-card .rank { font-size: 1.2rem; line-height: 1; }
+.mini-card .suit-sm { font-size: 0.9rem; line-height: 1; }
+.mini-card.glow { box-shadow: 0 0 20px var(--gold), 0 4px 16px rgba(0,0,0,0.5); border-color: var(--gold2); }
+.step-info { flex: 1; min-width: 160px; }
+.step-info .big-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  color: var(--gold);
+  line-height: 1;
+  font-weight: 900;
+}
+.step-info .step-label { font-size: 0.7rem; color: #7a9a88; margin-top: 2px; letter-spacing: 2px; text-transform: uppercase; }
+.step-info .card-name { font-size: 0.88rem; color: var(--text); margin-top: 8px; }
+.step-info .move-info { font-size: 0.78rem; color: var(--gold); margin-top: 4px; }
+
+/* HISTORY */
+.history-section {
+  padding: 16px 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.78rem;
+}
+.history-row .h-step { color: #7a9a88; min-width: 32px; font-size: 0.7rem; }
+.history-arrow { color: var(--dim); }
+.h-card-badge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border: 1px solid;
+}
+.h-card-badge.red { color: #e07060; border-color: #e07060; background: rgba(200,60,40,0.1); }
+.h-card-badge.black { color: #b0c0b0; border-color: #5a7a5a; background: rgba(90,120,90,0.1); }
+.h-move { color: var(--gold); font-size: 0.7rem; }
+
+/* RIGHT PANEL */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--dim);
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  color: #7a9a88;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+
+.tab-content { display: none; flex: 1; overflow: auto; padding: 16px; }
+.tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+
+/* VECTOR DISPLAY */
+.vector-title { font-size: 0.65rem; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.vector-bars { display: flex; flex-direction: column; gap: 2px; max-height: 400px; overflow-y: auto; }
+.vbar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.68rem;
+}
+.vbar-row.highlighted .vbar { background: var(--gold) !important; }
+.vbar-label { color: #7a9a88; font-size: 0.68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vbar-wrap { height: 8px; background: var(--dimmer); border-radius: 2px; overflow: hidden; }
+.vbar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+.vbar-val { color: var(--text); text-align: right; font-size: 0.65rem; }
+
+/* MATRIX HEATMAP */
+.matrix-wrap { flex: 1; overflow: auto; }
+#matrixCanvas { display: block; }
+.matrix-hint { font-size: 0.65rem; color: #7a9a88; text-align: center; margin-top: 8px; }
+
+/* STATS */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-box {
+  background: var(--dimmer);
+  border: 1px solid var(--dim);
+  border-radius: 4px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-val { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); font-weight: 700; }
+.stat-lbl { font-size: 0.62rem; color: #7a9a88; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+/* INITIAL DIST */
+.init-options { display: flex; flex-direction: column; gap: 8px; }
+.init-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--dimmer);
+  border: 1px solid var(--dim);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.init-opt:hover, .init-opt.active { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.init-opt input { accent-color: var(--gold); }
+.init-opt label { font-size: 0.78rem; cursor: pointer; }
+
+.card-select-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.cs-btn {
+  padding: 4px 2px;
+  background: var(--dimmer);
+  border: 1px solid var(--dim);
+  border-radius: 3px;
+  font-size: 0.65rem;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cs-btn:hover { border-color: var(--gold); }
+.cs-btn.selected-card { background: rgba(201,168,76,0.2); border-color: var(--gold); color: var(--gold2); }
+.cs-btn.red-suit { color: #e07060; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--felt); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* BOTTOM BAR */
+.bottom-bar {
+  background: #060e0a;
+  border-top: 2px solid var(--gold);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.bb-label { font-size: 0.65rem; color: #7a9a88; text-transform: uppercase; letter-spacing: 2px; }
+.bb-val { font-size: 0.88rem; color: var(--gold); font-weight: 600; }
+.bb-sep { color: var(--dim); }
+
+/* TOOLTIP */
+#tooltip {
+  position: fixed;
+  background: #060e0a;
+  border: 1px solid var(--gold);
+  color: var(--text);
+  font-size: 0.72rem;
+  padding: 6px 10px;
+  border-radius: 3px;
+  pointer-events: none;
+  display: none;
+  z-index: 100;
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Talia Kart jako <span>Łańcuch Markowa</span></h1>
+    <p>52 stany · macierz przejścia 52×52 · wektor stanu w n-tym kroku</p>
+  </div>
+  <div class="suit-deco">♠ ♥ ♦ ♣</div>
+</div>
+
+<div id="tooltip"></div>
+
+<div class="app">
+  <!-- LEFT -->
+  <div class="left-panel">
+
+    <div class="deck-section">
+      <div class="deck-title">♠ Talia kart — kliknij kartę by ustawić stan początkowy</div>
+      <div class="deck-ring-wrap">
+        <div class="deck-ring-inner">
+          <canvas id="deckCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-section">
+      <div class="input-group">
+        <div class="input-label">Krok n</div>
+        <input type="number" class="gold-input" id="stepInput" value="1" min="0" max="999" style="width:90px;">
+      </div>
+      <button class="gold-btn" onclick="goToStep()">Pokaż krok</button>
+      <button class="gold-btn secondary" onclick="stepBack()">◀ −1</button>
+      <button class="gold-btn secondary" onclick="stepForward()">+1 ▶</button>
+      <button class="gold-btn secondary" onclick="autoPlay()" id="autoBtn">▶▶ Auto</button>
+      <button class="gold-btn secondary" onclick="resetSim()">↺ Reset</button>
+    </div>
+
+    <div class="current-card-section">
+      <div class="deck-title">Aktualny stan</div>
+      <div class="step-result">
+        <div id="currentCardDisplay" class="mini-card glow black">
+          <span class="rank">?</span>
+          <span class="suit-sm">?</span>
+        </div>
+        <div class="step-info">
+          <div class="big-num" id="stepNumDisplay">0</div>
+          <div class="step-label">Krok</div>
+          <div class="card-name" id="cardNameDisplay">Wybierz kartę startową</div>
+          <div class="move-info" id="moveInfoDisplay">—</div>
+        </div>
+        <div id="nextCardDisplay" class="mini-card black" style="opacity:0.5;">
+          <span class="rank">?</span>
+          <span class="suit-sm">?</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="deck-title">Historia kroków</div>
+      <div id="historyList"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('vector',this)">Wektor π⁽ⁿ⁾</button>
+      <button class="tab-btn" onclick="switchTab('matrix',this)">Macierz P</button>
+      <button class="tab-btn" onclick="switchTab('init',this)">Rozkład π⁽⁰⁾</button>
+      <button class="tab-btn" onclick="switchTab('stats',this)">Statystyki</button>
+    </div>
+
+    <div class="tab-content active" id="tab-vector">
+      <div>
+        <div class="vector-title" id="vectorTitle">Wektor stanu π⁽⁰⁾</div>
+        <div class="vector-bars" id="vectorBars"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-matrix">
+      <div class="matrix-hint">Heatmap macierzy przejścia P (52×52). Jasny = p_{ij} > 0. Kliknij by zbliżyć rząd.</div>
+      <div class="matrix-wrap">
+        <canvas id="matrixCanvas"></canvas>
+      </div>
+      <div class="matrix-hint" id="matrixRowInfo" style="color:var(--gold);"></div>
+    </div>
+
+    <div class="tab-content" id="tab-init">
+      <div class="init-options">
+        <div class="init-opt active" id="opt-uniform" onclick="setInitMode('uniform',this)">
+          <input type="radio" name="initMode" checked> <label>Jednostajny (1/52 każda karta)</label>
+        </div>
+        <div class="init-opt" id="opt-single" onclick="setInitMode('single',this)">
+          <input type="radio" name="initMode"> <label>Jedna konkretna karta</label>
+        </div>
+        <div class="init-opt" id="opt-suit" onclick="setInitMode('suit',this)">
+          <input type="radio" name="initMode"> <label>Jednostajny w obrębie koloru</label>
+        </div>
+      </div>
+      <div id="cardSelectPanel" style="display:none;">
+        <div style="font-size:0.68rem;color:#7a9a88;margin-bottom:8px;">Wybierz kartę startową:</div>
+        <div class="card-select-grid" id="cardSelectGrid"></div>
+      </div>
+      <div id="suitSelectPanel" style="display:none;">
+        <div style="font-size:0.68rem;color:#7a9a88;margin-bottom:8px;">Wybierz kolor:</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="gold-btn secondary" onclick="selectSuit('♠')">♠ Piki</button>
+          <button class="gold-btn secondary" onclick="selectSuit('♥')">♥ Kiery</button>
+          <button class="gold-btn secondary" onclick="selectSuit('♦')">♦ Karo</button>
+          <button class="gold-btn secondary" onclick="selectSuit('♣')">♣ Trefle</button>
+        </div>
+      </div>
+      <button class="gold-btn" style="margin-top:12px;" onclick="applyInitDist()">✓ Zastosuj rozkład</button>
+    </div>
+
+    <div class="tab-content" id="tab-stats">
+      <div class="stat-grid" id="statsGrid"></div>
+      <div style="margin-top:16px;">
+        <div class="vector-title">Rozkład stacjonarny</div>
+        <div style="font-size:0.78rem;color:#7a9a88;line-height:1.7;">
+          Każda karta ma takie samo prawdopodobieństwo w stanie stacjonarnym = <span style="color:var(--gold)">1/52 ≈ 1.92%</span><br>
+          Macierz jest bistochastyczna — każda kolumna też sumuje się do 1.
+        </div>
+        <div style="margin-top:10px;padding:12px;background:var(--dimmer);border-left:3px solid var(--gold);font-size:0.78rem;line-height:1.7;">
+          <strong style="color:var(--gold)">Dlaczego?</strong> Ponieważ z każdej karty i przesuwamy się o wartość i,
+          a talia „owija się" mod 52. To łańcuch z jednym jedynym rozkładem stacjonarnym — jednostajnym.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <span class="bb-label">Krok:</span><span class="bb-val" id="bb-step">0</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-label">Pozycja:</span><span class="bb-val" id="bb-pos">—</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-label">Karta:</span><span class="bb-val" id="bb-card">—</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-label">Przesunięcie:</span><span class="bb-val" id="bb-move">—</span>
+  <span class="bb-sep">|</span>
+  <span class="bb-label">E[przesunięcia]:</span><span class="bb-val" id="bb-exp">—</span>
+</div>
+
+<script>
+// ─── CARD DEFINITIONS ────────────────────────────────────────────────────────
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RANK_VAL = {'A':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':4,'Q':3,'K':2};
+
+// 52 cards: index 0..51
+const CARDS = [];
+for(let s=0;s<4;s++) for(let r=0;r<13;r++) CARDS.push({rank:RANKS[r],suit:SUITS[s],val:RANK_VAL[RANKS[r]],idx:s*13+r});
+
+const N = 52;
+const isRed = (i) => CARDS[i].suit==='♥'||CARDS[i].suit==='♦';
+const cardLabel = (i) => CARDS[i].rank + CARDS[i].suit;
+const cardLongLabel = (i) => {
+  const c=CARDS[i];
+  const rn={'A':'As','J':'Walet','Q':'Dama','K':'Król'}[c.rank]||c.rank;
+  const sn={'♠':'Pik','♥':'Kier','♦':'Karo','♣':'Trefl'}[c.suit];
+  return `${rn} ${sn}`;
+};
+
+// ─── TRANSITION MATRIX ───────────────────────────────────────────────────────
+// P[i][j] = 1 if (i + val_i) mod 52 === j, else 0
+const P = Array.from({length:N},(_,i)=>{
+  const row = new Float32Array(N);
+  const dest = (i + CARDS[i].val) % N;
+  row[dest] = 1;
+  return row;
+});
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let piCurrent = new Float64Array(N).fill(1/N); // initial: uniform
+let initMode = 'uniform';
+let selectedInitCard = 0;
+let selectedInitSuit = '♠';
+let currentStep = 0;
+let history = []; // [{cardIdx, stepNum}]
+let autoInterval = null;
+
+// deterministic sim from a starting card
+function deterministicPath(startCard, steps) {
+  const path = [startCard];
+  let cur = startCard;
+  for(let i=0;i<steps;i++){
+    cur = (cur + CARDS[cur].val) % N;
+    path.push(cur);
+  }
+  return path;
+}
+
+// matrix-vector multiply π' = π·P
+function vecMatMul(vec) {
+  const out = new Float64Array(N);
+  for(let i=0;i<N;i++) if(vec[i]>1e-15) {
+    const dest=(i+CARDS[i].val)%N;
+    out[dest]+=vec[i];
+  }
+  return out;
+}
+
+function matPowVec(initVec, n) {
+  let v = new Float64Array(initVec);
+  for(let i=0;i<n;i++) v=vecMatMul(v);
+  return v;
+}
+
+// ─── CANVAS: DECK RING ────────────────────────────────────────────────────────
+const deckCanvas = document.getElementById('deckCanvas');
+const dCtx = deckCanvas.getContext('2d');
+let deckSize = 400;
+let hoveredCard = -1;
+let highlightedCard = -1; // currently "active" card
+
+function resizeDeckCanvas() {
+  const wrap = deckCanvas.parentElement;
+  deckSize = Math.min(wrap.clientWidth, wrap.clientHeight, 460);
+  deckCanvas.width = deckSize;
+  deckCanvas.height = deckSize;
+  drawDeck();
+}
+
+function drawDeck() {
+  const ctx = dCtx;
+  const W = deckSize, H = deckSize;
+  ctx.clearRect(0,0,W,H);
+
+  const cx=W/2, cy=H/2;
+  const R = W*0.42;
+  const cardW = W*0.055, cardH = W*0.085;
+
+  // outer ring
+  ctx.beginPath();
+  ctx.arc(cx,cy,R+cardH*0.7,0,Math.PI*2);
+  ctx.strokeStyle='rgba(201,168,76,0.12)';
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx,cy,R-cardH*0.7,0,Math.PI*2);
+  ctx.strokeStyle='rgba(201,168,76,0.06)';
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  // center label
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(201,168,76,0.5)';
+  ctx.font=`bold ${W*0.045}px Playfair Display, serif`;
+  ctx.fillText('52', cx, cy-W*0.025);
+  ctx.font=`${W*0.022}px JetBrains Mono, monospace`;
+  ctx.fillStyle='rgba(201,168,76,0.3)';
+  ctx.fillText('kart', cx, cy+W*0.025);
+
+  // draw each card
+  for(let i=0;i<N;i++){
+    const angle = (i/N)*Math.PI*2 - Math.PI/2;
+    const x = cx + R*Math.cos(angle);
+    const y = cy + R*Math.sin(angle);
+    const card = CARDS[i];
+    const red = card.suit==='♥'||card.suit==='♦';
+
+    const isHovered = i===hoveredCard;
+    const isHighlighted = i===highlightedCard;
+    const probVal = piCurrent[i];
+
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(angle+Math.PI/2);
+
+    const scale = isHighlighted?1.35:isHovered?1.2:1;
+    ctx.scale(scale,scale);
+
+    // card bg
+    const grd = ctx.createLinearGradient(-cardW/2,-cardH/2,cardW/2,cardH/2);
+    if(isHighlighted){
+      grd.addColorStop(0,'#f0d080');
+      grd.addColorStop(1,'#c9a84c');
+    } else if(probVal>0.03){
+      const alpha=Math.min(probVal*8,0.9);
+      grd.addColorStop(0,`rgba(74,158,106,${alpha})`);
+      grd.addColorStop(1,`rgba(20,80,40,${alpha})`);
+    } else {
+      grd.addColorStop(0,'#1e3828');
+      grd.addColorStop(1,'#142a1c');
+    }
+
+    ctx.beginPath();
+    ctx.roundRect(-cardW/2,-cardH/2,cardW,cardH,2);
+    ctx.fillStyle=grd;
+    ctx.fill();
+    ctx.strokeStyle=isHighlighted?'#f0d080':isHovered?'#c9a84c':'rgba(74,158,106,0.4)';
+    ctx.lineWidth=isHighlighted?2:1;
+    ctx.stroke();
+
+    // text
+    ctx.fillStyle=isHighlighted?'#111':red?'#c0392b':'#1a1a1a';
+    if(!isHighlighted) ctx.fillStyle=red?'#e07060':'#e8dfc0';
+    ctx.font=`bold ${cardW*0.75}px Playfair Display, serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(card.rank, 0, -cardH*0.15);
+    ctx.font=`${cardW*0.65}px Arial`;
+    ctx.fillText(card.suit, 0, cardH*0.22);
+
+    ctx.restore();
+  }
+}
+
+// click / hover on deck canvas
+function getCardAtXY(mx, my) {
+  const cx=deckSize/2, cy=deckSize/2, R=deckSize*0.42;
+  const cardW=deckSize*0.055, cardH=deckSize*0.085;
+  for(let i=0;i<N;i++){
+    const angle=(i/N)*Math.PI*2-Math.PI/2;
+    const x=cx+R*Math.cos(angle), y=cy+R*Math.sin(angle);
+    const dx=mx-x, dy=my-y;
+    if(Math.sqrt(dx*dx+dy*dy)<cardH*0.9) return i;
+  }
+  return -1;
+}
+
+deckCanvas.addEventListener('mousemove',e=>{
+  const rect=deckCanvas.getBoundingClientRect();
+  const scaleX=deckSize/rect.width, scaleY=deckSize/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const card=getCardAtXY(mx,my);
+  if(card!==hoveredCard){hoveredCard=card;drawDeck();}
+  // tooltip
+  const tip=document.getElementById('tooltip');
+  if(card>=0){
+    const c=CARDS[card];
+    tip.style.display='block';
+    tip.style.left=(e.clientX+14)+'px';
+    tip.style.top=(e.clientY-10)+'px';
+    const dest=(card+c.val)%N;
+    tip.innerHTML=`<b>${cardLabel(card)}</b> — ${cardLongLabel(card)}<br>Wartość: ${c.val} → przejście do <b style="color:var(--gold)">${cardLabel(dest)}</b><br>π[${card}] = ${(piCurrent[card]*100).toFixed(3)}%`;
+  } else { tip.style.display='none'; }
+});
+
+deckCanvas.addEventListener('mouseleave',()=>{
+  hoveredCard=-1;
+  document.getElementById('tooltip').style.display='none';
+  drawDeck();
+});
+
+deckCanvas.addEventListener('click',e=>{
+  const rect=deckCanvas.getBoundingClientRect();
+  const scaleX=deckSize/rect.width, scaleY=deckSize/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const card=getCardAtXY(mx,my);
+  if(card>=0){
+    setInitSingleCard(card);
+  }
+});
+
+// ─── SIMULATION ───────────────────────────────────────────────────────────────
+function buildInitVector() {
+  const v = new Float64Array(N);
+  if(initMode==='uniform') { v.fill(1/N); }
+  else if(initMode==='single') { v[selectedInitCard]=1; }
+  else if(initMode==='suit') {
+    const idx=SUITS.indexOf(selectedInitSuit);
+    for(let i=idx*13;i<(idx+1)*13;i++) v[i]=1/13;
+  }
+  return v;
+}
+
+function resetSim() {
+  stopAuto();
+  currentStep=0;
+  history=[];
+  piCurrent=buildInitVector();
+  document.getElementById('stepInput').value='0';
+  // find most likely card
+  let maxIdx=0;
+  for(let i=1;i<N;i++) if(piCurrent[i]>piCurrent[maxIdx]) maxIdx=i;
+  highlightedCard=maxIdx;
+  updateUI();
+}
+
+function goToStep() {
+  const n=parseInt(document.getElementById('stepInput').value)||0;
+  currentStep=Math.max(0,n);
+  piCurrent=matPowVec(buildInitVector(),currentStep);
+
+  // rebuild history (deterministic from most probable start)
+  const initV=buildInitVector();
+  let startCard=0;
+  for(let i=1;i<N;i++) if(initV[i]>initV[startCard]) startCard=i;
+  const path=deterministicPath(startCard,Math.min(currentStep,50));
+  history=path.map((c,i)=>({cardIdx:c,stepNum:i}));
+
+  const curCard=path[Math.min(currentStep,path.length-1)];
+  highlightedCard=curCard;
+  document.getElementById('stepInput').value=currentStep;
+  updateUI();
+}
+
+function stepForward() {
+  currentStep++;
+  piCurrent=vecMatMul(piCurrent);
+  const dest=(highlightedCard+CARDS[highlightedCard].val)%N;
+  history.push({cardIdx:dest,stepNum:currentStep});
+  if(history.length>80)history.shift();
+  highlightedCard=dest;
+  document.getElementById('stepInput').value=currentStep;
+  updateUI();
+}
+
+function stepBack() {
+  if(currentStep<=0) return;
+  currentStep--;
+  piCurrent=matPowVec(buildInitVector(),currentStep);
+  if(history.length>0) history.pop();
+  const initV=buildInitVector();
+  if(history.length>0) highlightedCard=history[history.length-1].cardIdx;
+  else { let m=0; for(let i=1;i<N;i++) if(initV[i]>initV[m])m=i; highlightedCard=m; }
+  document.getElementById('stepInput').value=currentStep;
+  updateUI();
+}
+
+let autoPlaying=false;
+function autoPlay() {
+  if(autoPlaying){ stopAuto(); return; }
+  autoPlaying=true;
+  document.getElementById('autoBtn').textContent='⏹ Stop';
+  autoInterval=setInterval(()=>{
+    if(currentStep>=200){ stopAuto(); return; }
+    stepForward();
+  },400);
+}
+function stopAuto() {
+  autoPlaying=false;
+  document.getElementById('autoBtn').textContent='▶▶ Auto';
+  if(autoInterval){ clearInterval(autoInterval); autoInterval=null; }
+}
+
+// ─── UI UPDATE ────────────────────────────────────────────────────────────────
+function updateUI() {
+  drawDeck();
+  updateCurrentCardDisplay();
+  updateVector();
+  updateHistory();
+  updateBottomBar();
+  // update matrix highlight if visible
+  if(document.getElementById('tab-matrix').classList.contains('active')) drawMatrix();
+}
+
+function updateCurrentCardDisplay() {
+  const card=CARDS[highlightedCard];
+  const red=isRed(highlightedCard);
+  const el=document.getElementById('currentCardDisplay');
+  el.className=`mini-card glow ${red?'red':'black'}`;
+  el.innerHTML=`<span class="rank">${card.rank}</span><span class="suit-sm">${card.suit}</span>`;
+
+  document.getElementById('stepNumDisplay').textContent=currentStep;
+  document.getElementById('cardNameDisplay').textContent=cardLongLabel(highlightedCard)+` (pos. ${highlightedCard+1})`;
+  document.getElementById('moveInfoDisplay').textContent=`Przesunięcie: +${card.val} → ${cardLabel((highlightedCard+card.val)%N)}`;
+
+  // next card preview
+  const nextIdx=(highlightedCard+card.val)%N;
+  const nextCard=CARDS[nextIdx];
+  const nextRed=isRed(nextIdx);
+  const nel=document.getElementById('nextCardDisplay');
+  nel.className=`mini-card ${nextRed?'red':'black'}`;
+  nel.style.opacity='0.7';
+  nel.innerHTML=`<span class="rank">${nextCard.rank}</span><span class="suit-sm">${nextCard.suit}</span>`;
+}
+
+function updateVector() {
+  document.getElementById('vectorTitle').textContent=`Wektor stanu π⁽${currentStep}⁾`;
+
+  // Sort by probability descending for display, but show top 26 + current
+  const sorted=[...Array(N).keys()].sort((a,b)=>piCurrent[b]-piCurrent[a]);
+  const toShow=sorted.slice(0,30);
+  if(!toShow.includes(highlightedCard)) toShow.push(highlightedCard);
+
+  const maxProb=Math.max(...toShow.map(i=>piCurrent[i]),0.001);
+  let html='';
+  toShow.forEach(i=>{
+    const p=piCurrent[i];
+    const pct=(p/maxProb*100).toFixed(1);
+    const isHl=i===highlightedCard;
+    html+=`<div class="vbar-row ${isHl?'highlighted':''}">
+      <div class="vbar-label" style="color:${isHl?'var(--gold)':isRed(i)?'#e07060':'var(--text)'}">${cardLabel(i)}</div>
+      <div class="vbar-wrap"><div class="vbar" style="width:${pct}%;${isHl?'background:var(--gold)':''}"></div></div>
+      <div class="vbar-val">${(p*100).toFixed(2)}%</div>
+    </div>`;
+  });
+  document.getElementById('vectorBars').innerHTML=html;
+}
+
+function updateHistory() {
+  const list=document.getElementById('historyList');
+  const toShow=history.slice(-20).reverse();
+  list.innerHTML=toShow.map((h,ri)=>{
+    const c=CARDS[h.cardIdx];
+    const red=isRed(h.cardIdx);
+    const isLast=ri===0;
+    return `<div class="history-row" style="${isLast?'background:rgba(201,168,76,0.05);':''}">
+      <span class="h-step">n=${h.stepNum}</span>
+      <span class="history-arrow">→</span>
+      <span class="h-card-badge ${red?'red':'black'}">${cardLabel(h.cardIdx)}</span>
+      <span style="font-size:0.7rem;color:#7a9a88;">${cardLongLabel(h.cardIdx)}</span>
+      <span class="h-move">+${c.val}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateBottomBar() {
+  const c=CARDS[highlightedCard];
+  document.getElementById('bb-step').textContent=currentStep;
+  document.getElementById('bb-pos').textContent=`${highlightedCard+1}/52`;
+  document.getElementById('bb-card').textContent=cardLongLabel(highlightedCard);
+  document.getElementById('bb-move').textContent=`+${c.val}`;
+  // expected value of move
+  const expMove=CARDS.reduce((s,card)=>s+card.val,0)/52;
+  document.getElementById('bb-exp').textContent=expMove.toFixed(2);
+}
+
+// ─── MATRIX HEATMAP ───────────────────────────────────────────────────────────
+function drawMatrix() {
+  const canvas=document.getElementById('matrixCanvas');
+  const wrap=canvas.parentElement;
+  const size=Math.min(wrap.clientWidth-8,580);
+  canvas.width=size; canvas.height=size;
+  const ctx=canvas.getContext('2d');
+  const cell=size/N;
+
+  ctx.clearRect(0,0,size,size);
+
+  // Draw cells
+  for(let i=0;i<N;i++){
+    for(let j=0;j<N;j++){
+      const v=P[i][j];
+      if(v>0){
+        const isHl=i===highlightedCard||j===highlightedCard;
+        ctx.fillStyle=isHl?'rgba(201,168,76,0.9)':'rgba(74,158,106,0.8)';
+      } else {
+        ctx.fillStyle='rgba(10,34,24,0.9)';
+      }
+      ctx.fillRect(j*cell,i*cell,cell,cell);
+    }
+  }
+
+  // Grid lines every 13 (suits)
+  ctx.strokeStyle='rgba(201,168,76,0.3)';
+  ctx.lineWidth=0.8;
+  for(let s=1;s<4;s++){
+    const pos=s*13*cell;
+    ctx.beginPath();ctx.moveTo(pos,0);ctx.lineTo(pos,size);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,pos);ctx.lineTo(size,pos);ctx.stroke();
+  }
+
+  // Highlight current row/col
+  ctx.strokeStyle='rgba(201,168,76,0.8)';
+  ctx.lineWidth=1.5;
+  const hi=highlightedCard;
+  ctx.strokeRect(0,hi*cell,size,cell);
+  ctx.strokeRect(hi*cell,0,cell,size);
+
+  // Suit labels
+  ctx.fillStyle='rgba(201,168,76,0.7)';
+  ctx.font=`${cell*8}px JetBrains Mono,monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  SUITS.forEach((s,si)=>{
+    const pos=(si*13+6.5)*cell;
+    ctx.fillText(s,pos,-cell*2.5);
+  });
+}
+
+document.getElementById('matrixCanvas').addEventListener('click',e=>{
+  const canvas=document.getElementById('matrixCanvas');
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/rect.width;
+  const scaleY=canvas.height/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const cell=canvas.width/N;
+  const row=Math.floor(my/cell);
+  if(row>=0&&row<N){
+    highlightedCard=row;
+    const dest=(row+CARDS[row].val)%N;
+    document.getElementById('matrixRowInfo').textContent=
+      `Wiersz ${row}: ${cardLabel(row)} (${cardLongLabel(row)}) → +${CARDS[row].val} → ${cardLabel(dest)}`;
+    drawDeck();
+    updateCurrentCardDisplay();
+    drawMatrix();
+  }
+});
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function buildStats() {
+  const totalMoves=CARDS.reduce((s,c)=>s+c.val,0);
+  const avgMove=(totalMoves/N).toFixed(2);
+  const maxMove=Math.max(...CARDS.map(c=>c.val));
+  const minMove=Math.min(...CARDS.map(c=>c.val));
+
+  // cycle detection: find period of chain from card 0
+  let cur=0, steps=0;
+  do { cur=(cur+CARDS[cur].val)%N; steps++; } while(cur!==0&&steps<1000);
+  const period=cur===0?steps:'?';
+
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-box"><div class="stat-val">${N}</div><div class="stat-lbl">Stanów</div></div>
+    <div class="stat-box"><div class="stat-val">${avgMove}</div><div class="stat-lbl">Śr. przesunięcie</div></div>
+    <div class="stat-box"><div class="stat-val">${minMove}</div><div class="stat-lbl">Min. ruch (As)</div></div>
+    <div class="stat-box"><div class="stat-val">${maxMove}</div><div class="stat-lbl">Maks. ruch (Król)</div></div>
+    <div class="stat-box"><div class="stat-val">${period}</div><div class="stat-lbl">Okres od poz.0</div></div>
+    <div class="stat-box"><div class="stat-val">1.92%</div><div class="stat-lbl">π stacjonarne</div></div>`;
+}
+
+// ─── INIT DIST UI ─────────────────────────────────────────────────────────────
+function setInitMode(mode, el) {
+  initMode=mode;
+  document.querySelectorAll('.init-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cardSelectPanel').style.display=mode==='single'?'block':'none';
+  document.getElementById('suitSelectPanel').style.display=mode==='suit'?'block':'none';
+}
+
+function buildCardSelectGrid() {
+  const grid=document.getElementById('cardSelectGrid');
+  grid.innerHTML='';
+  CARDS.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className=`cs-btn ${isRed(i)?'red-suit':''}`;
+    btn.textContent=cardLabel(i);
+    btn.onclick=()=>{ selectedInitCard=i; document.querySelectorAll('.cs-btn').forEach(b=>b.classList.remove('selected-card')); btn.classList.add('selected-card'); };
+    grid.appendChild(btn);
+  });
+}
+
+function setInitSingleCard(cardIdx) {
+  initMode='single';
+  selectedInitCard=cardIdx;
+  document.querySelectorAll('.init-opt').forEach(o=>o.classList.remove('active'));
+  document.getElementById('opt-single').classList.add('active');
+  document.getElementById('cardSelectPanel').style.display='block';
+  document.getElementById('suitSelectPanel').style.display='none';
+  document.querySelectorAll('.cs-btn').forEach((b,i)=>{ b.classList.toggle('selected-card',i===cardIdx); });
+  applyInitDist();
+  switchTab('vector',document.querySelector('.tab-btn'));
+}
+
+function selectSuit(suit) {
+  selectedInitSuit=suit;
+  applyInitDist();
+}
+
+function applyInitDist() {
+  piCurrent=buildInitVector();
+  currentStep=0;
+  history=[];
+  let maxIdx=0;
+  for(let i=1;i<N;i++) if(piCurrent[i]>piCurrent[maxIdx]) maxIdx=i;
+  highlightedCard=maxIdx;
+  document.getElementById('stepInput').value='0';
+  updateUI();
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{ if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${name}'`)) b.classList.add('active'); });
+  if(name==='matrix') setTimeout(drawMatrix,50);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  resizeDeckCanvas();
+  buildCardSelectGrid();
+  buildStats();
+  resetSim();
+  history=[{cardIdx:0,stepNum:0}];
+  updateUI();
+});
+window.addEventListener('resize',()=>{ resizeDeckCanvas(); if(document.getElementById('tab-matrix').classList.contains('active')) drawMatrix(); });
+</script>
+</body>
+</html>
